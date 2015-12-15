@@ -67,6 +67,9 @@ func ResolveExitCode(err error) int {
 	}
 	if e, ok := err.(*exec.ExitError); ok {
 		if status, ok := e.Sys().(syscall.WaitStatus); ok {
+			if status.Signaled() {
+				return int(status) | 0x80
+			}
 			return status.ExitStatus()
 		}
 	}
