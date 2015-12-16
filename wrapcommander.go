@@ -50,6 +50,15 @@ func IsInvoked(err error) bool {
 	return ok
 }
 
+// ErrorToWaitStatus try to convert error into syscall.WaitStatus
+func ErrorToWaitStatus(err error) (syscall.WaitStatus, bool) {
+	if e, ok := err.(*exec.ExitError); ok {
+		st, ok := e.Sys().(syscall.WaitStatus)
+		return st, ok
+	}
+	return 0, false
+}
+
 // ResolveExitCode retruns a int as command exit code from an error.
 func ResolveExitCode(err error) int {
 	if err == nil {
@@ -65,13 +74,12 @@ func ResolveExitCode(err error) int {
 			return ExitUnknownErr
 		}
 	}
-	if e, ok := err.(*exec.ExitError); ok {
-		if status, ok := e.Sys().(syscall.WaitStatus); ok {
-			if status.Signaled() {
-				return int(status) | 0x80
-			}
-			return status.ExitStatus()
+
+	if status, ok := ErrorToWaitStatus(err); ok {
+		if status.Signaled() {
+			return int(status) | 0x80
 		}
+		return status.ExitStatus()
 	}
 	// The exit codes in some platforms aren't integer. e.g. plan9.
 	return -1
