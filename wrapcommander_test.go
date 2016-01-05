@@ -3,6 +3,7 @@ package wrapcommander
 import (
 	"os/exec"
 	"reflect"
+	"runtime"
 	"testing"
 )
 
@@ -19,6 +20,9 @@ var isPermissionTests = []testCmd{
 }
 
 func TestIsPermission(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("not supported on windows")
+	}
 	for _, tt := range isPermissionTests {
 		err := exec.Command(tt.cmd).Run()
 		if got := IsPermission(err); got != tt.want {
@@ -55,6 +59,10 @@ var isExecFormatErrorTests = []testCmd{
 
 func TestIsExecFormatErrorTests(t *testing.T) {
 	for _, tt := range isExecFormatErrorTests {
+		if runtime.GOOS == "windows" {
+			t.Log("not supported on windows")
+			continue
+		}
 		err := exec.Command(tt.cmd).Run()
 		if got := IsExecFormatError(err); got != tt.want {
 			t.Errorf("IsExecFormatError(exec.Command(%#v).Run()) = %v; want %v", tt.cmd, got, tt.want)
@@ -79,6 +87,9 @@ var resolveExitCodeTests = []struct {
 }
 
 func TestResolveExitCode(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("not supported on windows")
+	}
 	for _, tt := range resolveExitCodeTests {
 		err := exec.Command(tt.cmd).Run()
 		got := ResolveExitCode(err)
