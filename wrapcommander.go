@@ -56,7 +56,8 @@ func ErrorToWaitStatus(err error) (syscall.WaitStatus, bool) {
 		st, ok := e.Sys().(syscall.WaitStatus)
 		return st, ok
 	}
-	return 0, false
+	var zero syscall.WaitStatus
+	return zero, false
 }
 
 // ResolveExitCode retruns a int as command exit code from an error.
@@ -77,7 +78,7 @@ func ResolveExitCode(err error) int {
 
 	if status, ok := ErrorToWaitStatus(err); ok {
 		if status.Signaled() {
-			return int(status) | 0x80
+			return status.ExitStatus() | 0x80
 		}
 		return status.ExitStatus()
 	}
