@@ -75,14 +75,9 @@ func ResolveExitCode(err error) int {
 			return ExitUnknownErr
 		}
 	}
-
 	if status, ok := ErrorToWaitStatus(err); ok {
-		if status.Signaled() {
-			return status.ExitStatus() | 0x80
-		}
-		return status.ExitStatus()
+		return resolveExitCode(status)
 	}
-	// The exit codes in some platforms aren't integer. e.g. plan9.
 	return -1
 }
 
