@@ -1,6 +1,7 @@
 package wrapcommander
 
 import (
+	"os"
 	"os/exec"
 	"reflect"
 	"runtime"
@@ -96,6 +97,17 @@ func TestResolveExitCode(t *testing.T) {
 		if got != tt.want {
 			t.Errorf("ResolveExitCode(exec.Command(%#v).Run()) = %v; want %v", tt.cmd, got, tt.want)
 		}
+	}
+}
+
+func TestResolveExitCode_sig(t *testing.T) {
+	cmd := exec.Command("sleep", "10")
+	cmd.Start()
+	cmd.Process.Signal(os.Interrupt)
+	err := cmd.Wait()
+	ex := ResolveExitCode(err)
+	if ex != 128+2 {
+		t.Errorf("something went wrong")
 	}
 }
 
