@@ -6,7 +6,7 @@ import "syscall"
 
 func resolveExitCode(w syscall.WaitStatus) int {
 	if w.Signaled() {
-		return int(w) | 0x80
+		return int(w.Signal()) + 128
 	}
 	return w.ExitStatus()
 }

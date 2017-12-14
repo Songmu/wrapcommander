@@ -1,6 +1,7 @@
 package wrapcommander
 
 import (
+	"os"
 	"os/exec"
 	"reflect"
 	"runtime"
@@ -14,9 +15,9 @@ type testCmd struct {
 
 var isPermissionTests = []testCmd{
 	{"go", false},
-	{"./_testdata/dir", true},
-	{"./_testdata/nopermission", true},
-	{"./_testdata/execformaterror", false},
+	{"./testdata/dir", true},
+	{"./testdata/nopermission", true},
+	{"./testdata/execformaterror", false},
 }
 
 func TestIsPermission(t *testing.T) {
@@ -34,7 +35,7 @@ func TestIsPermission(t *testing.T) {
 var isNotFoundInPATHTests = []testCmd{
 	{"go", false},
 	{"gogogo-dummy", true},
-	{"./_testdata/dir", false},
+	{"./testdata/dir", false},
 }
 
 func TestIsNotFoundInPATH(t *testing.T) {
@@ -52,9 +53,9 @@ func TestIsNotFoundInPATH(t *testing.T) {
 var isExecFormatErrorTests = []testCmd{
 	{"go", false},
 	{"gogogo-dummy", false},
-	{"./_testdata/dir", false},
-	{"./_testdata/echo.sh", false},
-	{"./_testdata/execformaterror", true},
+	{"./testdata/dir", false},
+	{"./testdata/echo.sh", false},
+	{"./testdata/execformaterror", true},
 }
 
 func TestIsExecFormatErrorTests(t *testing.T) {
@@ -80,10 +81,10 @@ var resolveExitCodeTests = []struct {
 	{"go", 2},
 	{"gogogo-dummy", ExitCommandNotFound},
 	{"./gogogo-dummy", ExitCommandNotFound},
-	{"./_testdata/dir", ExitCommandNotInvoked},
-	{"./_testdata/execformaterror", ExitCommandNotInvoked},
-	{"./_testdata/echo.sh", 0},
-	{"./_testdata/exit1.sh", 1},
+	{"./testdata/dir", ExitCommandNotInvoked},
+	{"./testdata/execformaterror", ExitCommandNotInvoked},
+	{"./testdata/echo.sh", 0},
+	{"./testdata/exit1.sh", 1},
 }
 
 func TestResolveExitCode(t *testing.T) {
@@ -96,6 +97,17 @@ func TestResolveExitCode(t *testing.T) {
 		if got != tt.want {
 			t.Errorf("ResolveExitCode(exec.Command(%#v).Run()) = %v; want %v", tt.cmd, got, tt.want)
 		}
+	}
+}
+
+func TestResolveExitCode_sig(t *testing.T) {
+	cmd := exec.Command("sleep", "10")
+	cmd.Start()
+	cmd.Process.Signal(os.Interrupt)
+	err := cmd.Wait()
+	ex := ResolveExitCode(err)
+	if ex != 128+2 {
+		t.Errorf("something went wrong")
 	}
 }
 
