@@ -101,6 +101,9 @@ func TestResolveExitCode(t *testing.T) {
 }
 
 func TestResolveExitCode_sig(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("not supported on windows")
+	}
 	cmd := exec.Command("sleep", "10")
 	cmd.Start()
 	cmd.Process.Signal(os.Interrupt)
