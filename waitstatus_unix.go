@@ -4,7 +4,7 @@ package wrapcommander
 
 import "syscall"
 
-func resolveExitCode(w syscall.WaitStatus) int {
+func waitStatusToExitCode(w syscall.WaitStatus) int {
 	if w.Signaled() {
 		return int(w.Signal()) + 128
 	}
