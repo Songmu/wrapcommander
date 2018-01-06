@@ -60,6 +60,11 @@ func ErrorToWaitStatus(err error) (syscall.WaitStatus, bool) {
 	return zero, false
 }
 
+// WaitStatusToExitCode converts WaitStatus to ExitCode
+func WaitStatusToExitCode(st syscall.WaitStatus) int {
+	return waitStatusToExitCode(st)
+}
+
 // ResolveExitCode retruns a int as command exit code from an error.
 func ResolveExitCode(err error) int {
 	if err == nil {
@@ -76,7 +81,7 @@ func ResolveExitCode(err error) int {
 		}
 	}
 	if status, ok := ErrorToWaitStatus(err); ok {
-		return resolveExitCode(status)
+		return WaitStatusToExitCode(status)
 	}
 	return -1
 }
