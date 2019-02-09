@@ -20,6 +20,11 @@ func (es *ExitStatus) Err() error {
 	return es.err
 }
 
+// ExitCode of the command
+func (es *ExitStatus) ExitCode() int {
+	return es.exitCode
+}
+
 // Signaled or not
 func (es *ExitStatus) Signaled() bool {
 	return es.signaled
@@ -36,15 +41,14 @@ func (es *ExitStatus) Signal() syscall.Signal {
 }
 
 // ResolveExitStatus resolve ExitStatus from command error
-func ResolveExitStatus(err error) (es *ExitStatus) {
-	if err == nil {
-		es.invoked = true
+func ResolveExitStatus(err error) *ExitStatus {
+	es := &ExitStatus{invoked: true, err: err}
+	if es.err == nil {
 		return es
 	}
-	es.err = err
-	eerr, ok := err.(*exec.ExitError)
-	es.invoked = ok
 
+	eerr, ok := es.err.(*exec.ExitError)
+	es.invoked = ok
 	if !es.invoked {
 		switch {
 		case os.IsPermission(err), IsExecFormatError(err):
