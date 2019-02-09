@@ -42,8 +42,13 @@ func (es *ExitStatus) Signal() syscall.Signal {
 
 // ResolveExitStatus resolve ExitStatus from command error
 func ResolveExitStatus(err error) *ExitStatus {
-	es := &ExitStatus{invoked: true, err: err}
+	es := &ExitStatus{
+		invoked:  true,
+		err:      err,
+		exitCode: -1,
+	}
 	if es.err == nil {
+		es.exitCode = 0
 		return es
 	}
 
@@ -63,7 +68,6 @@ func ResolveExitStatus(err error) *ExitStatus {
 
 	w, ok := eerr.Sys().(syscall.WaitStatus)
 	if !ok {
-		es.exitCode = -1
 		return es
 	}
 	es.signaled = w.Signaled()
