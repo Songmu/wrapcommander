@@ -3,7 +3,6 @@ package wrapcommander
 import (
 	"os"
 	"os/exec"
-	"syscall"
 )
 
 // exit statuses are same with GNU coreutils
@@ -32,14 +31,6 @@ func IsNotFoundInPATH(err error) bool {
 	return ok && e.Err == exec.ErrNotFound
 }
 
-// IsExecFormatError returns a boolean indicating whether the error is known to
-// report that format of an executable file is invalid.
-// ex. "fork/exec ./prog: exec format error"
-func IsExecFormatError(err error) bool {
-	e, ok := err.(*os.PathError)
-	return ok && e.Err == syscall.ENOEXEC
-}
-
 // IsInvoked returns a boolean indicating whether the error is known to report
 // that the command is invoked or not.
 func IsInvoked(err error) bool {
@@ -50,18 +41,18 @@ func IsInvoked(err error) bool {
 	return ok
 }
 
-// ErrorToWaitStatus try to convert error into syscall.WaitStatus
-func ErrorToWaitStatus(err error) (syscall.WaitStatus, bool) {
+// ErrorToWaitStatus try to convert error into WaitStatus
+func ErrorToWaitStatus(err error) (WaitStatus, bool) {
 	if e, ok := err.(*exec.ExitError); ok {
-		st, ok := e.Sys().(syscall.WaitStatus)
+		st, ok := e.Sys().(WaitStatus)
 		return st, ok
 	}
-	var zero syscall.WaitStatus
+	var zero WaitStatus
 	return zero, false
 }
 
 // WaitStatusToExitCode converts WaitStatus to ExitCode
-func WaitStatusToExitCode(st syscall.WaitStatus) int {
+func WaitStatusToExitCode(st WaitStatus) int {
 	return waitStatusToExitCode(st)
 }
 
