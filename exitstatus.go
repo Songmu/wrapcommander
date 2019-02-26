@@ -3,7 +3,6 @@ package wrapcommander
 import (
 	"os"
 	"os/exec"
-	"syscall"
 )
 
 // ExitStatus represents command exit status information
@@ -12,7 +11,7 @@ type ExitStatus struct {
 
 	exitCode          int
 	signaled, invoked bool
-	signal            syscall.Signal
+	signal            Signal
 }
 
 // Err returns original error
@@ -36,7 +35,7 @@ func (es *ExitStatus) Invoked() bool {
 }
 
 // Signal returns a received signal
-func (es *ExitStatus) Signal() syscall.Signal {
+func (es *ExitStatus) Signal() Signal {
 	return es.signal
 }
 
@@ -66,12 +65,11 @@ func ResolveExitStatus(err error) *ExitStatus {
 		return es
 	}
 
-	w, ok := eerr.Sys().(syscall.WaitStatus)
+	w, ok := eerr.Sys().(WaitStatus)
 	if !ok {
 		return es
 	}
-	es.signaled = w.Signaled()
-	es.signal = w.Signal()
+	es.signaled, es.signal = detectSignal(w)
 	es.exitCode = waitStatusToExitCode(w)
 
 	return es
