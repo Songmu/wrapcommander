@@ -9,10 +9,10 @@ deps:
 	go get ${u} -d
 
 .PHONY: devel-deps
-devel-deps: test-deps
+devel-deps: deps
 	GO111MODULE=off go get ${u}  \
 	  golang.org/x/lint/golint   \
-	  golang.org/mattn/goveralls \
+	  github.com/mattn/goveralls \
 	  github.com/Songmu/godzil/cmd/godzil
 
 .PHONY: test
@@ -27,3 +27,7 @@ lint: devel-deps
 .PHONY: cover
 cover: devel-deps
 	goveralls
+
+.PHONY: devel-deps
+release: devel-deps
+	godzil release
