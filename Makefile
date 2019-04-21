@@ -2,25 +2,32 @@ ifdef update
   u=-u
 endif
 
+export GO111MODULE=on
+
+.PHONY: deps
 deps:
-	go get -d -v -t ./...
+	go get ${u} -d
 
-test-deps:
-	go get -d -v ./...
+.PHONY: devel-deps
+devel-deps: deps
+	GO111MODULE=off go get ${u}  \
+	  golang.org/x/lint/golint   \
+	  github.com/mattn/goveralls \
+	  github.com/Songmu/godzil/cmd/godzil
 
-devel-deps: test-deps
-	go get golang.org/x/lint/golint
-	go get golang.org/x/tools/cmd/cover
-	go get github.com/mattn/goveralls
+.PHONY: test
+test: deps
+	go test
 
-test: test-deps
-	go test ./...
-
+.PHONY: lint
 lint: devel-deps
-	go vet ./...
-	golint -set_exit_status ./...
+	go vet
+	golint -set_exit_status
 
+.PHONY: cover
 cover: devel-deps
 	goveralls
 
-.PHONY: deps test-deps devel-deps test lint cover
+.PHONY: devel-deps
+release: devel-deps
+	godzil release
