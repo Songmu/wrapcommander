@@ -2,6 +2,7 @@ version: "{build}"
 clone_folder: c:\gopath\src\github.com\Songmu\wrapcommander
 environment:
   GOPATH: c:\gopath
+  GO111MODULE: on
 install:
 - copy c:\MinGW\bin\mingw32-make.exe c:\MinGW\bin\make.exe
 - set PATH=%GOROOT%\bin;%GOPATH%\bin;c:\MinGW\bin;%PATH%
