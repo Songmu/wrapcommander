@@ -8,6 +8,16 @@ import (
 )
 
 func TestResolveExitStatus(t *testing.T) {
+	var ext string
+	switch runtime.GOOS {
+	case "windows":
+		t.Skip("not supported on windows")
+	case "plan9":
+		ext = ".rc"
+	default:
+		ext = ".sh"
+	}
+
 	var testCases = []struct {
 		cmd  string
 		want int
@@ -17,13 +27,10 @@ func TestResolveExitStatus(t *testing.T) {
 		{"./gogogo-dummy", ExitCommandNotFound},
 		{"./testdata/dir", ExitCommandNotInvoked},
 		{"./testdata/execformaterror", ExitCommandNotInvoked},
-		{"./testdata/echo.sh", 0},
-		{"./testdata/exit1.sh", 1},
+		{"./testdata/echo" + ext, 0},
+		{"./testdata/exit1" + ext, 1},
 	}
 
-	if runtime.GOOS == "windows" {
-		t.Skip("not supported on windows")
-	}
 	for _, tt := range testCases {
 		err := exec.Command(tt.cmd).Run()
 		es := ResolveExitStatus(err)

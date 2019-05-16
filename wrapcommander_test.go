@@ -50,20 +50,24 @@ func TestIsNotFoundInPATH(t *testing.T) {
 	}
 }
 
-var isExecFormatErrorTests = []testCmd{
-	{"go", false},
-	{"gogogo-dummy", false},
-	{"./testdata/dir", false},
-	{"./testdata/echo.sh", false},
-	{"./testdata/execformaterror", true},
-}
-
 func TestIsExecFormatErrorTests(t *testing.T) {
+	var ext string
+	switch runtime.GOOS {
+	case "windows":
+		t.Skip("not supported on windows")
+	case "plan9":
+		ext = ".rc"
+	default:
+		ext = ".sh"
+	}
+	var isExecFormatErrorTests = []testCmd{
+		{"go", false},
+		{"gogogo-dummy", false},
+		{"./testdata/dir", false},
+		{"./testdata/echo" + ext, false},
+		{"./testdata/execformaterror", true},
+	}
 	for _, tt := range isExecFormatErrorTests {
-		if runtime.GOOS == "windows" {
-			t.Log("not supported on windows")
-			continue
-		}
 		err := exec.Command(tt.cmd).Run()
 		if got := IsExecFormatError(err); got != tt.want {
 			t.Errorf("IsExecFormatError(exec.Command(%#v).Run()) = %v; want %v", tt.cmd, got, tt.want)
@@ -74,23 +78,29 @@ func TestIsExecFormatErrorTests(t *testing.T) {
 	}
 }
 
-var resolveExitCodeTests = []struct {
-	cmd  string
-	want int
-}{
-	{"go", 2},
-	{"gogogo-dummy", ExitCommandNotFound},
-	{"./gogogo-dummy", ExitCommandNotFound},
-	{"./testdata/dir", ExitCommandNotInvoked},
-	{"./testdata/execformaterror", ExitCommandNotInvoked},
-	{"./testdata/echo.sh", 0},
-	{"./testdata/exit1.sh", 1},
-}
-
 func TestResolveExitCode(t *testing.T) {
-	if runtime.GOOS == "windows" {
+	var ext string
+	switch runtime.GOOS {
+	case "windows":
 		t.Skip("not supported on windows")
+	case "plan9":
+		ext = ".rc"
+	default:
+		ext = ".sh"
 	}
+	var resolveExitCodeTests = []struct {
+		cmd  string
+		want int
+	}{
+		{"go", 2},
+		{"gogogo-dummy", ExitCommandNotFound},
+		{"./gogogo-dummy", ExitCommandNotFound},
+		{"./testdata/dir", ExitCommandNotInvoked},
+		{"./testdata/execformaterror", ExitCommandNotInvoked},
+		{"./testdata/echo" + ext, 0},
+		{"./testdata/exit1" + ext, 1},
+	}
+
 	for _, tt := range resolveExitCodeTests {
 		err := exec.Command(tt.cmd).Run()
 		got := ResolveExitCode(err)
