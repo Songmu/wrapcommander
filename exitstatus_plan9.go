@@ -6,56 +6,67 @@ import "strings"
 
 type Signal int
 
+// These numbers are imported from /sys/include/ape/signal.h
 const (
-	// see /sys/include/ape/signal.h
-	SIGHUP  Signal = 1
-	SIGINT         = 2
-	SIGQUIT        = 3
-	SIGILL         = 4
-	SIGABRT        = 5
-	SIGFPE         = 6
-	SIGKILL        = 7
-	SIGSEGV        = 8
-	SIGPIPE        = 9
-	SIGALRM        = 10
-	SIGTERM        = 11
-	SIGUSR1        = 12
-	SIGUSR2        = 13
+	_SIGHUP  Signal = 1
+	_SIGINT         = 2
+	_SIGQUIT        = 3
+	_SIGILL         = 4
+	_SIGABRT        = 5
+	_SIGFPE         = 6
+	_SIGKILL        = 7
+	_SIGSEGV        = 8
+	_SIGPIPE        = 9
+	_SIGALRM        = 10
+	_SIGTERM        = 11
+	_SIGUSR1        = 12
+	_SIGUSR2        = 13
 )
 
+// This table is imported from /sys/src/ape/lib/ap/plan9/signal.c
 var sigtab = []struct {
 	Msg string
 	Sig Signal
 }{
-	{"hangup", SIGHUP},
-	{"interrupt", SIGINT},
-	{"quit", SIGQUIT},
-	{"alarm", SIGALRM},
-	{"sys: trap: illegal instruction", SIGILL},
-	{"sys: trap: reserved instruction", SIGILL},
-	{"sys: trap: reserved", SIGILL},
-	{"sys: trap: arithmetic overflow", SIGFPE},
-	{"abort", SIGABRT},
-	{"sys: fp:", SIGFPE},
-	{"exit", SIGKILL},
-	{"die", SIGKILL},
-	{"kill", SIGKILL},
-	{"sys: trap: bus error", SIGSEGV},
-	{"sys: trap: address error", SIGSEGV},
-	{"sys: trap: TLB", SIGSEGV},
-	{"sys: write on closed pipe", SIGPIPE},
-	{"alarm", SIGALRM},
-	{"term", SIGTERM},
-	{"usr1", SIGUSR1},
-	{"usr2", SIGUSR2},
+	{"hangup", _SIGHUP},
+	{"interrupt", _SIGINT},
+	{"quit", _SIGQUIT},
+	{"alarm", _SIGALRM},
+	{"sys: trap: illegal instruction", _SIGILL},
+	{"sys: trap: reserved instruction", _SIGILL},
+	{"sys: trap: reserved", _SIGILL},
+	{"sys: trap: arithmetic overflow", _SIGFPE},
+	{"abort", _SIGABRT},
+	{"sys: fp:", _SIGFPE},
+	{"exit", _SIGKILL},
+	{"die", _SIGKILL},
+	{"kill", _SIGKILL},
+	{"sys: trap: bus error", _SIGSEGV},
+	{"sys: trap: address error", _SIGSEGV},
+	{"sys: trap: TLB", _SIGSEGV},
+	{"sys: write on closed pipe", _SIGPIPE},
+	{"alarm", _SIGALRM},
+	{"term", _SIGTERM},
+	{"usr1", _SIGUSR1},
+	{"usr2", _SIGUSR2},
 }
 
-func detectSignal(w WaitStatus) (signaled bool, signal Signal) {
+func lookupSignal(msg string) Signal {
 	for _, sig := range sigtab {
-		if strings.HasPrefix(w.Msg, sig.Msg) {
-			signaled = true
-			signal = sig.Sig
+		if strings.Contains(msg, sig.Msg) {
+			return sig.Sig
 		}
 	}
-	return
+	return 0
+}
+
+func detectSignal(w WaitStatus) (bool, Signal) {
+	msg := causeMsg(w.Msg)
+	if msg == "" {
+		return false, 0
+	}
+	if sig := lookupSignal(msg); sig != 0 {
+		return true, sig
+	}
+	return false, 0
 }
