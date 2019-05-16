@@ -21,8 +21,8 @@ var isPermissionTests = []testCmd{
 }
 
 func TestIsPermission(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("not supported on windows")
+	if runtime.GOOS == "windows" || runtime.GOOS == "plan9" {
+		t.Skip("not supported on windows or plan9")
 	}
 	for _, tt := range isPermissionTests {
 		err := exec.Command(tt.cmd).Run()
