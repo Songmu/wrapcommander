@@ -8,6 +8,7 @@ import (
 	"syscall"
 )
 
+// WaitStatus represents exit status of a process.
 type WaitStatus = *syscall.Waitmsg
 
 /*

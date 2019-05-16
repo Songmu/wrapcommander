@@ -4,6 +4,7 @@ package wrapcommander
 
 import "strings"
 
+// Signal represents POSIX signal.
 type Signal int
 
 // These numbers are imported from /sys/include/ape/signal.h

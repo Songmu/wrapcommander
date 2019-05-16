@@ -4,6 +4,7 @@ package wrapcommander
 
 import "syscall"
 
+// WaitStatus represents exit status of a process.
 type WaitStatus = syscall.WaitStatus
 
 func waitStatusToExitCode(w WaitStatus) int {
