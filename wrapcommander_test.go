@@ -68,6 +68,10 @@ func TestIsExecFormatErrorTests(t *testing.T) {
 		{"./testdata/execformaterror", true},
 	}
 	for _, tt := range isExecFormatErrorTests {
+		if runtime.GOOS == "plan9" && tt.cmd == "./testdata/dir" {
+			t.Logf("%s: not supported on plan9", tt.cmd)
+			continue
+		}
 		err := exec.Command(tt.cmd).Run()
 		if got := IsExecFormatError(err); got != tt.want {
 			t.Errorf("IsExecFormatError(exec.Command(%#v).Run()) = %v; want %v", tt.cmd, got, tt.want)
